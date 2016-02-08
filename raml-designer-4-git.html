@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<base href="https://cdn.rawgit.com/mulesoft/api-designer/master/">
+<title>Stephanesan's app</title>
+<link rel="stylesheet" href="dist/styles/api-designer-vendor.css">
+<link rel="stylesheet" href="dist/styles/api-designer.css">
+</head>
+<body ng-app="ramlEditorApp">
+<raml-editor></raml-editor>
+<script src="dist/scripts/api-designer-vendor.js"></script>
+<script src="dist/scripts/api-designer.js"></script>
+<script>
+// This part is needed only if you want to provide your own Persistance Implementation
+// Angular Module must match "ramlEditorApp"
+angular.module('ramlEditorApp')
+.factory('MyFileSystem', function ($q, config, $rootScope, $http) {
+
+        var service = {};
+        var files = [];
+
+        function getParams() {
+            var queries = window.location.search.replace(/^\?/, '').split('&');
+            var searchObject = {};
+            for( i = 0; i < queries.length; i++ ) {
+                split = queries[i].split('=');
+                searchObject[split[0]] = decodeURIComponent(split[1]);
+            }
+            var repo = searchObject['gitRepo'];
+            var path = searchObject['gitPath'];
+            var ref = searchObject['gitRef'];
+            if (repo == null) {
+                repo = 'mulesoft/api-console';
+                path = 'dist/examples';
+            }
+            if (path == null) path = '.';
+            if (ref == null) ref = 'master';
+            return {repo: repo, path: path, ref: ref};
+        }
+        
+        var gitParams = getParams();
+
+        service.directory = function (path) {
+            var deferred = $q.defer();
+            console.log("directory path " + path);
+
+            // make a closure with the current object to insert the results into
+            function makeParseGit (current) {
+                console.log("makeParseGit " + current.path);
+                return function parseGit (response) {
+                   var data = response.data;
+                   current.children = [];
+                   console.log("current? " + JSON.stringify(current));
+                   for(var i=0; i<data.length; i++) {
+                       var index = path + (data[i].name); 
+                       files[index] = data[i].download_url; 
+                       var type = data[i].type;
+                       if(type  == 'file') {
+                           console.log("has file " + data[i].name);
+                           current.children.push({path: data[i].name, type: 'file'}); 
+                       } else {
+                           console.log("has folder " + data[i].name);
+                           current.children.push({path: (data[i].name+'/'), type: 'folder'}); 
+                       }
+                    }
+                    return current;
+                };
+            };
+
+            var root = {path: gitParams.path};
+            
+            function dir(current) {
+                p1 = new Promise(
+                        function(resolve, reject) {
+                        var f = makeParseGit(current);
+                        $http.get('https://api.github.com/repos/'+gitParams.repo+'/contents/'+current.path+'?ref='+gitParams.ref).then(
+                            function (data) {
+                                var out = f(data);
+                                var promisses = [];
+                                for (var i=0; i<out.children.length; i++) {
+                                    if(out.children[i].type == 'folder') {
+                                         promisses.push(dir(out.children[i]));
+                                    }
+                                }
+                                if(promisses.length != 0) {
+                                    Promise.all(promisses).then(function(data) {
+                                            resolve(out);
+                                    });
+                                } else {
+                                    resolve(out);
+                                }
+                            }, function(response) {
+                                alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");
+                                reject(response.status);
+                            } 
+                        );
+                        }
+                    );
+                return p1;
+            };
+
+            console.log('start recurse') 
+                dir(root).then(function(data) {
+                        console.log('done recurse');
+                        deferred.resolve(data);
+                    });
+            
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.load = function (path) {
+            var deferred = $q.defer();
+            var download_url = files[('/'+path)]; 
+            if(undefined == download_url) {
+                console.log("skip download " + path);
+                deferred.resolve({});
+            } else {
+                console.log("download (" +path+") " + download_url);
+            }
+
+            $http(
+                    {   url: download_url, 
+                        method: 'GET', 
+                        transformResponse: [function (data) {
+                          return data;
+                          }]
+                    }).then(function(response) {
+                        console.log(response.data);
+                        deferred.resolve(response.data);
+            }, function(response) {
+                alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");
+                reject(response.status);
+            });
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.remove = function (path, name) {
+            var deferred = $q.defer();
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.save = function (path, name, contents) {
+            var deferred = $q.defer();
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        return service;
+})
+.run(function (MyFileSystem, config, $rootScope) {
+        // Set MyFileSystem as the filesystem to use
+        config.set('fsFactory', 'MyFileSystem');
+
+        // In case you want to send notifications to the user
+        // (for instance, that he must login to save).
+        // The expires flags means whether
+        // it should be hidden after a period of time or the
+        // user should dismiss it manually.
+        $rootScope.$broadcast('event:notification',
+            {message: 'File saved.', expires: true});
+
+        });
+</script>
+<style>
+html,
+body {
+    height: 100%;
+}
+</style>
+</body>
+</html>

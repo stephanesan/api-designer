@@ -34,7 +34,7 @@ angular.module('ramlEditorApp')
                 repo = 'mulesoft/api-console';
                 path = 'dist/examples';
             }
-            if (path == null) path = '.';
+            if (path == null) path = '';
             if (ref == null) ref = 'master';
             return {repo: repo, path: path, ref: ref};
         }
@@ -43,6 +43,9 @@ angular.module('ramlEditorApp')
 
         service.directory = function (path) {
             var deferred = $q.defer();
+            // trim the trailing slash, github api doesn't permit this when using query parameters. 
+            path = path.replace(/\/$/, "");
+
             console.log("directory path " + path);
 
             // make a closure with the current object to insert the results into
@@ -53,15 +56,15 @@ angular.module('ramlEditorApp')
                    current.children = [];
                    console.log("current? " + JSON.stringify(current));
                    for(var i=0; i<data.length; i++) {
-                       var index = path + (data[i].name); 
+                       var index = current.path +'/' + (data[i].name); 
                        files[index] = data[i].download_url; 
                        var type = data[i].type;
                        if(type  == 'file') {
                            console.log("has file " + data[i].name);
-                           current.children.push({path: data[i].name, type: 'file'}); 
+                           current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
                        } else {
                            console.log("has folder " + data[i].name);
-                           current.children.push({path: (data[i].name+'/'), type: 'folder'}); 
+                           current.children.push({path: (current.path+'/'+data[i].name), type: 'folder'}); 
                        }
                     }
                     return current;
@@ -115,7 +118,7 @@ angular.module('ramlEditorApp')
 
         service.load = function (path) {
             var deferred = $q.defer();
-            var download_url = files[('/'+path)]; 
+            var download_url = files[(path)]; 
             if(undefined == download_url) {
                 console.log("skip download " + path);
                 deferred.resolve({});
@@ -130,7 +133,7 @@ angular.module('ramlEditorApp')
                           return data;
                           }]
                     }).then(function(response) {
-                        console.log(response.data);
+                        //console.log(response.data);
                         deferred.resolve(response.data);
             }, function(response) {
                 alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");

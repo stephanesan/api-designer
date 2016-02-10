@@ -8,6 +8,12 @@
 <link rel="stylesheet" href="dist/styles/api-designer.css">
 </head>
 <body ng-app="ramlEditorApp">
+<div style="height:32px; background-color: #072f38; color: #fff; min-width: 690px;">
+    <div style="height:100%; vertical-align: middle; display: inline-block"><image ng-src={{gitHubAvatar}} style="height:100%"/></div>
+    <div style="vertical-align: middle; display: inline-block">
+        <b> {{gitHubOwnerType}}: </b> {{gitHubOwnerLogin}} <b> Repo: </b> {{gitHubName}} <b> Ref: </b> {{gitHubRef}}
+    </div>
+</div>
 <raml-editor></raml-editor>
 <script src="dist/scripts/api-designer-vendor.js"></script>
 <script src="dist/scripts/api-designer.js"></script>
@@ -19,6 +25,18 @@ angular.module('ramlEditorApp')
 
         var service = {};
         var files = [];
+
+        function updateHeader(repo, path, ref) {
+            $rootScope.gitHubRepo=repo;
+            $http.get("https://api.github.com/repos/" + repo)
+            .then(function(response) {
+                $rootScope.gitHubAvatar = response.data.owner.avatar_url;
+                $rootScope.gitHubOwnerType = response.data.owner.type; 
+                $rootScope.gitHubOwnerLogin = response.data.owner.login;
+                $rootScope.gitHubName = response.data.name +"/"+ path;
+                $rootScope.gitHubRef = ref;
+                });
+        }
 
         function getParams() {
             var queries = window.location.search.replace(/^\?/, '').split('&');
@@ -36,6 +54,7 @@ angular.module('ramlEditorApp')
             }
             if (path == null) path = '';
             if (ref == null) ref = 'master';
+            updateHeader(repo, path, ref);
             return {repo: repo, path: path, ref: ref};
         }
         

@@ -1,0 +1,12 @@
+{
+    "branches":
+    {
+        "pattern": "^api_",
+        "flags": ""
+     },
+    "tags":
+    {
+        "pattern": "^OIC_API_",
+        "flags": ""
+     }
+}

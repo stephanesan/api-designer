@@ -1,0 +1,51 @@
+*
+{
+    border: 0;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+html, body
+{
+    height: 100%;
+}
+
+#layout
+{
+    width: 100%;
+    min-height: 100%;
+    overflow-y: hidden;
+}
+
+#content-wrapper
+{
+    position: absolute;
+    top: 32px;
+    bottom: 0px;
+    width: 100%;
+}
+
+#content
+{
+    width: 100%;
+    height: 100%;
+}    
+
+.animate-show {
+    height:32px; 
+    background-color: #072f38;
+    color: #fff; 
+    min-width: 690px;
+    opacity: 1;
+}
+.animate-show select {
+    color: #fff; 
+}
+.animate-show.ng-hide-add, .animate-show.ng-hide-remove {
+    transition: all linear 2s;
+}
+.animate-show.ng-hide {
+    height:0px; 
+    opacity: 0;
+}

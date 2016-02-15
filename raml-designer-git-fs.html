@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<base href="https://cdn.rawgit.com/mulesoft/api-designer/master/">
+<title>Raml Console (Stephanesan)</title>
+<link rel="stylesheet" href="dist/styles/api-designer-vendor.css">
+<link rel="stylesheet" href="dist/styles/api-designer.css">
+<style>
+.animate-hide {
+    height:32px; 
+    background-color: #072f38;
+    color: #fff; 
+    min-width: 690px;
+    opacity: 1;
+}
+.animate-hide.ng-hide-add, .animate-hide.ng-hide-remove {
+    transition: all linear 0.5s;
+}
+.animate-hide.ng-hide {
+    height:0px; 
+    opacity: 0;
+}
+</style>
+</head>
+<body ng-app="ramlEditorApp">
+<div class="animate-hide ng-hide" ng-show="gitHeader">
+        <div style="vertical-align: middle; display: inline-block"><b>Content from: </b></div>
+        <div style="height:100%; vertical-align: middle; display: inline-block"><image ng-src={{gitHubAvatar}} style="height:100%"/></div>
+        <div style="vertical-align: middle; display: inline-block">
+            <a style='color:inherit' ng-href={{gitHubOwnerHtmlURL}}>{{gitHubOwnerLogin}}</a> <i>({{gitHubOwnerType}})</i> <b> Path: </b> <a style='color:inherit' ng-href={{gitHubHtmlUrl}}>{{gitHubRepoName}}</a>/{{gitHubRepoPath}}
+        </div>
+        <div style="vertical-align: middle; display: inline-block">
+            <form name="myForm">
+                <label for="mySelect" ><b>Ref:</b></label>
+                <!-- Not sure why thsi doesn't work???
+                <select name="myOtherSelect" id="myOtherSelect"
+                    ng-options="option.name for option in refs.availableOptions"
+                    ></select>
+                -->
+                <select name="mySelect" id="mySelect" style="background-color:inherit;" ></select>
+
+            </form>
+        </div>
+    </div>
+<raml-editor></raml-editor>
+<script src="dist/scripts/api-designer-vendor.js"></script>
+<script src="dist/scripts/api-designer.js"></script>
+<script>
+// This part is needed only if you want to provide your own Persistance Implementation
+// Angular Module must match "ramlEditorApp"
+angular.module('ramlEditorApp')
+.factory('MyFileSystem', function ($q, config, $rootScope, $http) {
+
+        var service = {};
+        var files = [];
+
+        function updateHeader(repo, path, ref) {
+
+            var p1 = $http({method: "get", url: "https://api.github.com/repos/" + repo, cache: true});
+            var p2 = $http({method: "get", url: "https://api.github.com/repos/" + repo + "/branches", cache: true});
+            var p3 = $http({method: "get", url: "https://api.github.com/repos/" + repo + "/tags", cache: true});
+
+            $q.all([p1, p2, p3]).then(function(responses) {
+                console.log("all 2 promisses arrived"); 
+                var resp1 = responses[0];
+                $rootScope.gitHubAvatar = resp1.data.owner.avatar_url;
+                $rootScope.gitHubOwnerHtmlURL = resp1.data.owner.html_url; 
+                $rootScope.gitHubOwnerType = resp1.data.owner.type; 
+                $rootScope.gitHubOwnerLogin = resp1.data.owner.login;
+                $rootScope.gitHubRepoName = resp1.data.name;
+                $rootScope.gitHubRepoPath = path;
+                $rootScope.gitHubHtmlUrl = resp1.data.html_url;
+
+                console.log("Start building options"); 
+                // Build the select element
+               
+                var mySelect= document.getElementById("mySelect");
+
+                var index=0;
+                var availableOptions = [];
+                availableOptions[index] = {id: "branches", name: "branches", disabled: true};
+                var branches = responses[1].data; 
+                for(var branch of branches) {
+                    availableOptions[++index] = {id: branch.name, name: branch.name, disabled: false};
+                }
+                // Set the tag options
+                console.log("Start building options: tags"); 
+                availableOptions[++index] = {id: "tags", name: "tags", disabled: true};
+                var tags = responses[2].data; 
+                for(var tag of tags) {
+                    availableOptions[++index] = {id: tag.name, name: tag.name, disabled: false};
+                }
+
+                var option;
+                for (var o of availableOptions) {
+                    option = document.createElement("option");
+                    option.value = 
+                    option.text = o.name;
+                    option.disabled = o.disabled;
+                    if(o.name === ref) 
+                        option.selected=true;
+                    else
+                        option.selected=false;
+                    mySelect.appendChild(option);
+                }
+
+                mySelect.onchange = function(e) {
+                    var currentLocation = window.location.href;
+                    var newLocation = currentLocation.replace(/\?.*/,
+                            '?'+ 
+                            'gitRepo='+ $rootScope.gitHubOwnerLogin +'/'+ $rootScope.gitHubRepoName +
+                            '&gitPath=' + $rootScope.gitHubRepoPath +
+                            '&gitRef=' + e.target.selectedOptions[0].text); 
+                    console.log("relocating to "+newLocation);
+                    window.location=newLocation;  
+                  }
+
+                // Not sure why the angularjs way doesn't work...
+                // Set the branch options 
+                $rootScope.refs = {availableOptions: availableOptions};
+
+                // Set the selected option
+                //$rootScope.refs.selectedOption= {id: ref};
+                //$rootScope.refs.changed = function() {
+                //    console.log($rootScope.refs.selectedOption.id); 
+                //};
+                console.log("Start building options: done"); 
+
+                // We're done, let's display it all now
+                $rootScope.gitHeader=true;
+            });
+        }
+
+        function getParams() {
+            var queries = window.location.search.replace(/^\?/, '').split('&');
+            var searchObject = {};
+            for( i = 0; i < queries.length; i++ ) {
+                split = queries[i].split('=');
+                searchObject[split[0]] = decodeURIComponent(split[1]);
+            }
+            var repo = searchObject['gitRepo'];
+            var path = searchObject['gitPath'];
+            var ref = searchObject['gitRef'];
+            if (repo == null) {
+                repo = 'mulesoft/api-console';
+                path = 'dist/examples';
+            }
+            if (path == null) path = '';
+            if (ref == null) ref = 'master';
+            updateHeader(repo, path, ref);
+            return {repo: repo, path: path, ref: ref};
+        }
+        
+        var gitParams = getParams();
+
+        service.directory = function (path) {
+            var deferred = $q.defer();
+            // trim the trailing slash, github api doesn't permit this when using query parameters. 
+            path = path.replace(/\/$/, "");
+
+            console.log("directory path " + path);
+
+            // make a closure with the current object to insert the results into
+            function makeParseGit (current) {
+                console.log("makeParseGit " + current.path);
+                return function parseGit (response) {
+                   var data = response.data;
+                   current.children = [];
+                   console.log("current? " + JSON.stringify(current));
+                   for(var i=0; i<data.length; i++) {
+                       var index = current.path +'/' + (data[i].name); 
+                       files[index] = data[i].download_url; 
+                       var type = data[i].type;
+                       if(type  == 'file') {
+                           console.log("has file " + data[i].name);
+                           current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
+                       } else {
+                           console.log("has folder " + data[i].name);
+                           current.children.push({path: (current.path+'/'+data[i].name), type: 'folder'}); 
+                       }
+                    }
+                    return current;
+                };
+            };
+
+            var root = {path: gitParams.path};
+            
+            function dir(current) {
+                p1 = new Promise(
+                        function(resolve, reject) {
+                        var f = makeParseGit(current);
+                        $http.get('https://api.github.com/repos/'+gitParams.repo+'/contents/'+current.path+'?ref='+gitParams.ref).then(
+                            function (data) {
+                                var out = f(data);
+                                var promisses = [];
+                                for (var i=0; i<out.children.length; i++) {
+                                    if(out.children[i].type == 'folder') {
+                                         promisses.push(dir(out.children[i]));
+                                    }
+                                }
+                                if(promisses.length != 0) {
+                                    Promise.all(promisses).then(function(data) {
+                                            resolve(out);
+                                    });
+                                } else {
+                                    resolve(out);
+                                }
+                            }, function(response) {
+                                alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");
+                                reject(response.status);
+                            } 
+                        );
+                        }
+                    );
+                return p1;
+            };
+
+            console.log('start recurse') 
+                dir(root).then(function(data) {
+                        console.log('done recurse');
+                        deferred.resolve(data);
+                    });
+            
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.load = function (path) {
+            var deferred = $q.defer();
+            var download_url = files[(path)]; 
+            if(undefined == download_url) {
+                console.log("skip download " + path);
+                deferred.resolve({});
+            } else {
+                console.log("download (" +path+") " + download_url);
+            }
+
+            $http(
+                    {   url: download_url, 
+                        method: 'GET', 
+                        transformResponse: [function (data) {
+                          return data;
+                          }]
+                    }).then(function(response) {
+                        //console.log(response.data);
+                        deferred.resolve(response.data);
+            }, function(response) {
+                alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");
+                reject(response.status);
+            });
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.remove = function (path, name) {
+            var deferred = $q.defer();
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        service.save = function (path, name, contents) {
+            var deferred = $q.defer();
+
+            // Your magic goes here:
+            // Do deferred.resolve(data); to fulfull the promise or
+            // deferred.reject(error); to reject it.
+
+            return deferred.promise;
+        };
+
+        return service;
+})
+.run(function (MyFileSystem, config, $rootScope) {
+        // Set MyFileSystem as the filesystem to use
+        config.set('fsFactory', 'MyFileSystem');
+
+        // In case you want to send notifications to the user
+        // (for instance, that he must login to save).
+        // The expires flags means whether
+        // it should be hidden after a period of time or the
+        // user should dismiss it manually.
+        $rootScope.$broadcast('event:notification',
+            {message: 'File saved.', expires: true});
+
+        });
+</script>
+<style>
+html,
+body {
+    height: 100%;
+}
+</style>
+<footer>
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-73616509-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</footer>
+</body>
+</html>

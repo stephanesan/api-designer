@@ -62,6 +62,10 @@ angular
                 $scope.refs.selectedOption= {id: gitParams.ref};
                 $scope.refs.changed = function() {
                     gitParams.ref = $scope.refs.selectedOption.id; 
+                    history.pushState(
+                            null, 
+                            null, 
+                            window.location.search.replace(/^\?.*/, querryString()));
                     updateIframe();
                 };
 

@@ -39,12 +39,6 @@ html, body
     min-width: 690px;
     opacity: 1;
 }
-.animate-show select {
-    color: #fff; 
-}
-.animate-show.ng-hide-add, .animate-show.ng-hide-remove {
-    transition: all linear 2s;
-}
 .animate-show.ng-hide {
     height:0px; 
     opacity: 0;

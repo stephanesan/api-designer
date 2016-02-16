@@ -17,7 +17,7 @@
         <div style="vertical-align: middle; display: inline-block">
             <form name="myForm">
                 <label for="mySelect"><b>Ref:</b></label>
-                <select name="mySelect" id="mySelect" style="background-color:inherit;"
+                <select name="mySelect" id="mySelect" 
                     ng-options="option.name disable when option.disabled for option in refs.availableOptions track by option.id"
                     ng-model="refs.selectedOption" ng-change="refs.changed()"></select>
             </form>

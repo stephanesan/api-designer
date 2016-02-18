@@ -4,7 +4,7 @@ angular
 .module('headerApp', [])
 .controller('headerController', 
 
-        function ($scope, $http, $q, $sce) {
+    function ($scope, $http, $q, $sce) {
 
         function updateHeader() {
 
@@ -51,6 +51,7 @@ angular
                 if(!found) {
                     // bad ref, force it to the last matching entry;
                     gitParams.ref = replacement;
+                    console.log("Default ");
                     history.pushState(
                             null, 
                             null, 
@@ -108,11 +109,14 @@ angular
                     {
                         console.log("Filter: "+JSON.stringify(response.data));
                         headerConfig= response.data;
+                        if(undefined == gitParams.ref && undefined != headerConfig.ref) {
+                            gitParams.ref = headerConfig.ref;
+                        }
                         updateHeader();
                     }, 
                     function(response) 
                     {
-                        console.log("No config");
+                        console.log("Default filter: "+JSON.stringify(headerConfig));
                         updateHeader();
                     }
                 );
@@ -131,26 +135,28 @@ angular
             if (repo == null) {
                 repo = 'mulesoft/api-console';
                 path = 'dist/examples';
+                ref = 'master';
             }
-            if (path == null) path = '';
-            if (ref == null) ref = 'master';
-            return {repo: repo, path: path, ref: ref};
+            var out = {repo: repo, path: path, ref: ref}; 
+            console.log("gitParams=" + JSON.stringify(out));
+            return out;
         }
 
         function querryString() {
-            return ('?'+
-                'gitRepo='+ gitParams.repo +
-                '&gitPath=' + gitParams.path +
-                '&gitRef=' + gitParams.ref);
-         }
+            var querry = '?gitRepo='+ gitParams.repo;
+            if(gitParams.path!=null) 
+                querry+='&gitPath=' + gitParams.path;
+            if(gitParams.ref!=null) 
+                querry+='&gitRef=' + gitParams.ref;
+            return querry;
+        }
         function updateIframe() {
             $scope.ramlLocation = $sce.trustAsResourceUrl("./raml-designer-git-fs.html"+ querryString());
         }
 
         var gitParams = getParams();
-        var headerConfig; 
+        var headerConfig = { };
         getHeaderConfig(); 
-        //updateIframe();
 
     });
 

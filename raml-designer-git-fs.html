@@ -119,6 +119,7 @@ angular.module('ramlEditorApp')
         service.load = function (path) {
             var deferred = $q.defer();
             var download_url = files[(path)]; 
+            ga('send', 'pageview',  location.pathname + location.search + '#'+ encodeURIComponent(path));
             if(undefined == download_url) {
                 console.log("skip download " + path);
                 deferred.resolve({});

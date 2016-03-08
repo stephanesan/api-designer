@@ -1,6 +1,6 @@
-# api-designer console for oic api.
+# api-designer console for github hosted raml/json-schema files.
 
-A graphical, web based tool from [MuleSoft] (https://www.mulesoft.com/platform/api/api-designer) that is adapted to syncs with OIC's [IoTDataModels]  (https://github.com/OpenInterConnect/IoTDataModels) to document the APIs in a human friendly interactive console and makes it easy to engage fellow application developers.
+A graphical, web based tool from [MuleSoft] (https://www.mulesoft.com/platform/api/api-designer) that is adapted to pull content from github (example syncs with OIC's [IoTDataModels]  (https://github.com/OpenInterConnect/IoTDataModels) to document the APIs in a human friendly interactive console and makes it easy to engage fellow application developers.
 
 API Designer is a standalone/embeddable editor for RAML (RESTful API Modeling Language) written in JavaScript using Angular.JS. By default, the editor uses an in-browser filesystem stored in HTML5 Localstorage. This version has been modified to pull content directly from github.
 
@@ -16,17 +16,20 @@ Currently supported keys are:
   * Example: OIC-Release-1.0.0
 
 ## Resulting examples:
-* [The OIC's data model OIC-Release-1.0.0 version] (https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels&gitRef=OIC-Release-1.0.0).
+* [The 'OIC_API_1.0.0' tagged version of the OIC data model] (https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels&gitRef=OIC-Release-1.0.0).
 ```
-https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels&gitRef=OIC-Release-1.0.0
+https://rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels&gitRef=OIC_API_1.0.0
 ```
-* [The latest (master) OIC data model] (https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels).
+* [The 'api_core' branch version of the OIC core data model] (https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels).
 ```
-https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels
+https://rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=OpenInterConnect/IoTDataModels&gitRef=api_core
 ```
 * Some [example raml] (https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=mulesoft/api-console&gitPath=dist/examples) files hosted under the 'mulesoft/api-console' repo at the 'dist/examples' path.
 ```
-https://cdn.rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=mulesoft/api-console&gitPath=dist/examples
+https://rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitRepo=mulesoft/api-console&gitPath=dist/examples
 ```
 ## License
 [CPAL-1.0] (https://opensource.org/licenses/CPAL-1.0)
+
+## Known limitation:
+* Currently the tool only pulls content from github. Pushing back content would require implicit grant support for accessing the github api's requiring authorization.

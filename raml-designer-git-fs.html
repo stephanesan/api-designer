@@ -19,6 +19,7 @@ angular.module('ramlEditorApp')
 
         var service = {};
         var files = [];
+        var dirs = [];
 
         function getParams() {
             var queries = window.location.search.replace(/^\?/, '').split('&');
@@ -52,32 +53,57 @@ angular.module('ramlEditorApp')
             function makeParseGit (current) {
                 console.log("makeParseGit " + current.path);
                 return function parseGit (response) {
-                   var data = response.data;
                    current.children = [];
                    console.log("current? " + JSON.stringify(current));
-                   for(var i=0; i<data.length; i++) {
-                       var index = current.path +'/' + (data[i].name); 
-                       files[index] = data[i].download_url; 
-                       var type = data[i].type;
-                       if(type  == 'file') {
-                           console.log("has file " + data[i].name);
-                           current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
-                       } else {
-                           console.log("has folder " + data[i].name);
-                           current.children.push({path: (current.path+'/'+data[i].name), type: 'folder'}); 
+                   // response is either an array of objects (download_url request)
+                   if(Array.isArray(response.data)) {
+                       var data = response.data;
+                       for(var i=0; i<data.length; i++) {
+                           var index = current.path +'/' + (data[i].name); 
+                           var type = data[i].type;
+                           if( 'file' == type && null != data[i].download_url) {
+                               console.log("has file " + data[i].name);
+                               current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
+                               files[index] = {type: type, url: data[i].download_url}; 
+                           } else {
+                               console.log("has folder " + data[i].name);
+                               current.children.push({path: (current.path+'/'+data[i].name), type: 'folder'}); 
+                               dirs[index] = data[i].git_url; 
+                               console.log('push dirs['+index+']='+data[i].git_url);
+                           }
                        }
-                    }
-                    return current;
+                   // or response has a tree with an array of objects (git_url request)
+                   } else if(Array.isArray(response.data.tree)) {
+                       data = response.data.tree;
+                       for(var i=0; i<data.length; i++) {
+                           var index = current.path +'/' + (data[i].path); 
+                           var type = data[i].type;
+                           if( 'blob' == type) {
+                               console.log("has blob " + data[i].path);
+                               current.children.push({path: (current.path+'/'+data[i].path), type: 'file'}); 
+                               files[index] = {type: type, url: data[i].url}; 
+                           } else {
+                               console.log("has tree " + data[i].path);
+                               current.children.push({path: (current.path+'/'+data[i].path), type: 'folder'}); 
+                               dirs[index] = data[i].url; 
+                               console.log('push dirs['+index+']='+data[i].git_url);
+                           }
+                       }
+                   } else {
+                       console.error("unhandled data!");
+                   }
+                   return current;
                 };
             };
 
-            var root = {path: gitParams.path};
-            
             function dir(current) {
                 p1 = new Promise(
                         function(resolve, reject) {
                         var f = makeParseGit(current);
-                        $http.get('https://api.github.com/repos/'+gitParams.repo+'/contents/'+current.path+'?ref='+gitParams.ref).then(
+                        var git_url = dirs[current.path];
+                        console.log('pop dirs['+current.path+']='+git_url);
+                        $http.get(git_url).then(
+                        //$http.get('https://api.github.com/repos/'+gitParams.repo+'/contents/'+current.path+'?ref='+gitParams.ref).then(
                             function (data) {
                                 var out = f(data);
                                 var promisses = [];
@@ -103,12 +129,14 @@ angular.module('ramlEditorApp')
                 return p1;
             };
 
-            console.log('start recurse') 
-                dir(root).then(function(data) {
-                        console.log('done recurse');
-                        deferred.resolve(data);
+            console.log('start recurse') ;
+            var root = {path: gitParams.path};
+            dirs[root.path]='https://api.github.com/repos/'+gitParams.repo+'/contents/'+root.path+'?ref='+gitParams.ref;
+            dir(root).then(function(data) {
+                    console.log('done recurse');
+                    deferred.resolve(data);
                     });
-            
+
             // Your magic goes here:
             // Do deferred.resolve(data); to fulfull the promise or
             // deferred.reject(error); to reject it.
@@ -118,7 +146,7 @@ angular.module('ramlEditorApp')
 
         service.load = function (path) {
             var deferred = $q.defer();
-            var download_url = files[(path)]; 
+            var download_url = files[(path)].url; 
             ga('send', 'pageview',  location.pathname + location.search + '#'+ encodeURIComponent(path));
             if(undefined == download_url) {
                 console.log("skip download " + path);
@@ -127,6 +155,17 @@ angular.module('ramlEditorApp')
                 console.log("download (" +path+") " + download_url);
             }
 
+            // make a closure with the path to lookup context of the callback 
+            function makeParseBlob (path) {
+                console.log("makeParseBlob " + path);
+                return function (response) {
+                    if(files[path] != undefined && files[path].type == 'blob')
+                        return atob(JSON.parse(response.data).content);
+                    else
+                        return response.data; 
+                };
+            }
+            var f = makeParseBlob(path); 
             $http(
                     {   url: download_url, 
                         method: 'GET', 
@@ -135,7 +174,8 @@ angular.module('ramlEditorApp')
                           }]
                     }).then(function(response) {
                         //console.log(response.data);
-                        deferred.resolve(response.data);
+                        var data = f(response); 
+                       deferred.resolve(data);
             }, function(response) {
                 alert("Failed: " + response.config.method + " on \"" + response.config.url +"\" returned: "+response.statusText+".");
                 reject(response.status);

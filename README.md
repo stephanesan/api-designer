@@ -1,8 +1,8 @@
 # api-designer console for github hosted raml/json-schema files.
 
-A graphical, web based tool from [MuleSoft] (https://www.mulesoft.com/platform/api/api-designer) that is adapted to pull content from github (example syncs with OIC's [IoTDataModels]  (https://github.com/OpenInterConnect/IoTDataModels) to document the APIs in a human friendly interactive console and makes it easy to engage fellow application developers.
+A graphical, web based tool from [MuleSoft] (https://www.mulesoft.com/platform/api/api-designer) that has been adapted to pull content directly from github and documents the APIs in a human friendly interactive console making it easy to engage fellow application developers.
 
-API Designer is a standalone/embeddable editor for RAML (RESTful API Modeling Language) written in JavaScript using Angular.JS. By default, the editor uses an in-browser filesystem stored in HTML5 Localstorage. This version has been modified to pull content directly from github.
+API Designer is a standalone/embeddable editor for RAML (RESTful API Modeling Language) written in JavaScript using Angular.JS. By default, the editor uses an in-browser filesystem stored in HTML5 Localstorage. This version has been modified to pull content directly from github instead.
 
 ## Usage
 
@@ -32,4 +32,4 @@ https://rawgit.com/stephanesan/api-designer/master/raml-designer-4-git.html?gitR
 [CPAL-1.0] (https://opensource.org/licenses/CPAL-1.0)
 
 ## Known limitation:
-* Currently the tool only pulls content from github. Pushing back content would require implicit grant support for accessing the github api's requiring authorization.
+* Currently the tool only pulls content from github. Pushing back content would require OAuth implicit grant support for accessing the github api's requiring authorization. Implicit grant is not supported by Github at the time of writing.

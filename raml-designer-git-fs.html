@@ -63,8 +63,10 @@ angular.module('ramlEditorApp')
                            var type = data[i].type;
                            if( 'file' == type && null != data[i].download_url) {
                                console.log("has file " + data[i].name);
-                               current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
-                               files[index] = {type: type, url: data[i].download_url}; 
+                               if((/\.(raml|json)$/i).test(data[i].name)) {
+                                   current.children.push({path: (current.path+'/'+data[i].name), type: 'file'}); 
+                                   files[index] = {type: type, url: data[i].download_url}; 
+                               }
                            } else {
                                console.log("has folder " + data[i].name);
                                current.children.push({path: (current.path+'/'+data[i].name), type: 'folder'}); 
@@ -80,8 +82,10 @@ angular.module('ramlEditorApp')
                            var type = data[i].type;
                            if( 'blob' == type) {
                                console.log("has blob " + data[i].path);
-                               current.children.push({path: (current.path+'/'+data[i].path), type: 'file'}); 
-                               files[index] = {type: type, url: data[i].url}; 
+                               if((/\.(raml|json)$/i).test(data[i].path)) {
+                                   current.children.push({path: (current.path+'/'+data[i].path), type: 'file'}); 
+                                   files[index] = {type: type, url: data[i].url}; 
+                               }
                            } else {
                                console.log("has tree " + data[i].path);
                                current.children.push({path: (current.path+'/'+data[i].path), type: 'folder'}); 

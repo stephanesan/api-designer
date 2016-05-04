@@ -31,7 +31,6 @@ angular
                 var replacement = null;
                 if(branches.length != 0) {
                     $scope.refs.availableOptions.push({id: "branches", name: "branches", disabled: true});
-                    //for(var branch of branches) {
                     branches.forEach(function(branch){
                         $scope.refs.availableOptions.push({id: branch.name, name: branch.name});
                         if(branch.name === gitParams.ref) found=true;
@@ -42,7 +41,6 @@ angular
                 var tags = filterArray(responses[2].data, headerConfig.tags); 
                 if(tags.length != 0) {
                     $scope.refs.availableOptions.push({id: "tags", name: "tags", disabled: true});
-                    //for(var tag of tags) {
                     tags.forEach(function(tag){
                         $scope.refs.availableOptions.push({id: tag.name, name: tag.name});
                         if(tag.name === gitParams.ref) found=true;
@@ -90,7 +88,6 @@ angular
                    return out;
             }
             var regExp = new RegExp(config.pattern, config.flags); 
-            //for(var el of array) {
             array.forEach(function(el){
                 if(regExp.test(el.name)) {
                     out.push(el);

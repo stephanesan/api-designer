@@ -68,12 +68,12 @@ angular.module('ramlEditorApp')
                            if( 'file' == type && null != data[i].download_url) {
                                console.log("has file " + data[i].name);
                                if((/\.(md|raml|json)$/i).test(data[i].name)) {
-                                   current.children.push({path: index, type: 'file'}); 
+                                   current.children.push({path: index, type: 'file', meta: {}}); 
                                    files[index] = {type: type, url: data[i].download_url}; 
                                }
                            } else {
                                console.log("has folder " + data[i].name);
-                               current.children.push({path: index, type: 'folder'}); 
+                               current.children.push({path: index, type: 'folder', meta: {}}); 
                                dirs[index] = data[i].git_url; 
                                console.log('push dirs['+index+']='+data[i].git_url);
                            }
@@ -87,12 +87,12 @@ angular.module('ramlEditorApp')
                            if( 'blob' == type) {
                                console.log("has blob " + data[i].path);
                                if((/\.(md|raml|json)$/i).test(data[i].path)) {
-                                   current.children.push({path: index, type: 'file'}); 
+                                   current.children.push({path: index, type: 'file', meta: {}}); 
                                    files[index] = {type: type, url: data[i].url}; 
                                }
                            } else {
                                console.log("has tree " + data[i].path);
-                               current.children.push({path: index, type: 'folder'}); 
+                               current.children.push({path: index, type: 'folder', meta: {}}); 
                                dirs[index] = data[i].url; 
                                console.log('push dirs['+index+']='+data[i].git_url);
                            }
@@ -156,7 +156,7 @@ angular.module('ramlEditorApp')
             var deferred = $q.defer();
             if(files[(path)] == undefined || files[(path)].url == undefined) {
                 console.log("skip download " + path);
-                return deferred.reject(new Error("Unknown file location"));
+                throw ("Unknow file location");
             }
             var download_url = files[(path)].url;
             console.log("download (" +path+") " + download_url);

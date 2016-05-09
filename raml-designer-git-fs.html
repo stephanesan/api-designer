@@ -167,7 +167,9 @@ angular.module('ramlEditorApp')
                 console.log("makeParseBlob " + path);
                 return function (response) {
                     if(files[path] != undefined && files[path].type == 'blob')
-                        return atob(JSON.parse(response.data).content);
+                        // Windows return an error when '/n' is present in base64 encoded content
+                        // Remove those from the content before calling atob
+                        return atob(JSON.parse(response.data).content.replace(/\s/g, ""));
                     else
                         return response.data; 
                 };

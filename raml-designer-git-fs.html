@@ -46,17 +46,28 @@ angular.module('ramlEditorApp')
                        var data = response.data;
                        for(var i=0; i<data.length; i++) {
                            var type = data[i].type;
-                           var index = (current.path.slice(current.path.length-1) == "/")? current.path + data[i].name : (current.path +'/' + (data[i].name)); 
-                           if( 'file' == type && null != data[i].download_url) {
+                           var index = (current.path.slice(current.path.length-1) == "/")? current.path + data[i].name : (current.path +'/' + (data[i].name));
+                           // use JSON format instead intead of plain text
+                           // (i.e. use .url instead of .download_url)
+                           // because github doesn't allow cross origin
+                           // on plain text files but does allow it on JSON
+                           if( 'file' == type && null != data[i].url) {
                                console.log("has file " + data[i].name);
                                if((/\.(md|raml|json)$/i).test(data[i].name)) {
-                                   current.children.push({path: index, type: 'file', meta: {}}); 
-                                   files[index] = {type: type, url: data[i].download_url}; 
+                                   current.children.push({path: index, type: 'file', meta: {}});
+                                   files[index] = {type: 'blob', url: data[i].url};
                                }
                            } else {
+                           //if( 'file' == type && null != data[i].download_url) {
+                           //    console.log("has file " + data[i].name);
+                           //    if((/\.(md|raml|json)$/i).test(data[i].name)) {
+                           //        current.children.push({path: index, type: 'file', meta: {}});
+                           //        files[index] = {type: type, url: data[i].download_url};
+                           //    }
+                           //} else {
                                console.log("has folder " + data[i].name);
-                               current.children.push({path: index, type: 'folder', meta: {}}); 
-                               dirs[index] = data[i].git_url; 
+                               current.children.push({path: index, type: 'folder', meta: {}});
+                               dirs[index] = data[i].git_url;
                                console.log('push dirs['+index+']='+data[i].git_url);
                            }
                        }

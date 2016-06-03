@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<script src="querry-parameters.js"></script>
 <base href="https://cdn.rawgit.com/mulesoft/api-designer/master/">
 <title>Stephanesan's app</title>
 <link rel="stylesheet" href="dist/styles/api-designer-vendor.css">
@@ -21,25 +22,6 @@ angular.module('ramlEditorApp')
         var files = [];
         var dirs = [];
 
-        function getParams() {
-            var queries = window.location.search.replace(/^\?/, '').split('&');
-            var searchObject = {};
-            for( i = 0; i < queries.length; i++ ) {
-                split = queries[i].split('=');
-                searchObject[split[0]] = decodeURIComponent(split[1]);
-            }
-            var repo = searchObject['gitRepo'];
-            var path = searchObject['gitPath'];
-            var ref = searchObject['gitRef'];
-            if (repo == null) {
-                repo = 'mulesoft/api-console';
-                path = 'dist/examples';
-            }
-            if (path == null) path = '/';
-            if (ref == null) ref = 'master';
-            return {repo: repo, path: path, ref: ref};
-        }
-        
         var gitParams = getParams();
 
         service.directory = function (path) {
@@ -139,7 +121,7 @@ angular.module('ramlEditorApp')
 
             console.log('start recurse') ;
             var root = {path: '/'};
-            dirs[root.path]='https://api.github.com/repos/'+gitParams.repo+'/contents/'+gitParams.path+'?ref='+gitParams.ref;
+            dirs[root.path]='https://'+gitParams.api+'repos/'+gitParams.repo+'/contents/'+gitParams.path+'?ref='+gitParams.ref;
             dir(root).then(function(data) {
                     console.log('done recurse');
                     deferred.resolve(data);

@@ -8,9 +8,9 @@ angular
 
         function updateHeader() {
 
-            var p1 = $http({method: "get", url: "https://api.github.com/repos/" + gitParams.repo, cache: true});
-            var p2 = $http({method: "get", url: "https://api.github.com/repos/" + gitParams.repo + "/branches", cache: true});
-            var p3 = $http({method: "get", url: "https://api.github.com/repos/" + gitParams.repo + "/tags", cache: true});
+            var p1 = $http({method: "get", url: "https://"+gitParams.api + "repos/" + gitParams.repo, cache: true});
+            var p2 = $http({method: "get", url: "https://"+gitParams.api + "repos/" + gitParams.repo + "/branches", cache: true});
+            var p3 = $http({method: "get", url: "https://"+gitParams.api + "repos/" + gitParams.repo + "/tags", cache: true});
 
             $q.all([p1, p2, p3]).then(function(responses) {
                 var resp1 = responses[0];
@@ -55,7 +55,7 @@ angular
                     history.pushState(
                             null, 
                             null, 
-                            window.location.search.replace(/^\?.*/, querryString()));
+                            window.location.search.replace(/^\?.*/, querryString(gitParams)));
                 }
 
 
@@ -66,7 +66,7 @@ angular
                     history.pushState(
                             null, 
                             null, 
-                            window.location.search.replace(/^\?.*/, querryString()));
+                            window.location.search.replace(/^\?.*/, querryString(gitParams)));
                     updateIframe();
                 };
 
@@ -122,36 +122,8 @@ angular
                 );
         }
 
-        function getParams() {
-            var queries = window.location.search.replace(/^\?/, '').split('&');
-            var searchObject = {};
-            for(var i = 0; i < queries.length; i++ ) {
-                var split = queries[i].split('=');
-                searchObject[split[0]] = decodeURIComponent(split[1]);
-            }
-            var repo = searchObject['gitRepo'];
-            var path = searchObject['gitPath'];
-            var ref = searchObject['gitRef'];
-            if (repo == null) {
-                repo = 'mulesoft/api-console';
-                path = 'dist/examples';
-                ref = 'master';
-            }
-            var out = {repo: repo, path: path, ref: ref}; 
-            console.log("gitParams=" + JSON.stringify(out));
-            return out;
-        }
-
-        function querryString() {
-            var querry = '?gitRepo='+ gitParams.repo;
-            if(gitParams.path!=null) 
-                querry+='&gitPath=' + gitParams.path;
-            if(gitParams.ref!=null) 
-                querry+='&gitRef=' + gitParams.ref;
-            return querry;
-        }
         function updateIframe() {
-            $scope.ramlLocation = $sce.trustAsResourceUrl("./raml-designer-git-fs.html"+ querryString());
+            $scope.ramlLocation = $sce.trustAsResourceUrl("./raml-designer-git-fs.html"+ querryString(gitParams));
         }
 
         var gitParams = getParams();

@@ -53,7 +53,7 @@ angular.module('ramlEditorApp')
                            // on plain text files but does allow it on JSON
                            if( 'file' == type && null != data[i].url) {
                                console.log("has file " + data[i].name);
-                               if((/\.(md|raml|json)$/i).test(data[i].name)) {
+                               if((/\.(md|raml|json|schema|xml|xsd)$/i).test(data[i].name)) {
                                    current.children.push({path: index, type: 'file', meta: {}});
                                    files[index] = {type: 'blob', url: data[i].url};
                                }

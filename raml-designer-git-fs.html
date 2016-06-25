@@ -79,7 +79,7 @@ angular.module('ramlEditorApp')
                            var type = data[i].type;
                            if( 'blob' == type) {
                                console.log("has blob " + data[i].path);
-                               if((/\.(md|raml|json)$/i).test(data[i].path)) {
+                               if((/\.(md|raml|json|schema|xml|xsd)$/i).test(data[i].path)) {
                                    current.children.push({path: index, type: 'file', meta: {}}); 
                                    files[index] = {type: type, url: data[i].url}; 
                                }

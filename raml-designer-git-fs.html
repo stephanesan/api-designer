@@ -23,7 +23,11 @@ angular.module('ramlEditorApp')
         var dirs = [];
 
         var gitParams = getParams();
-
+        if(gitParams.file != undefined) {
+            var newPath = gitParams.file; 
+            config.set('currentFile', JSON.stringify({path: newPath, name: newPath.slice(newPath.lastIndexOf('/') + 1)}));
+        }
+ 
         service.directory = function (path) {
             var deferred = $q.defer();
 
@@ -213,7 +217,7 @@ angular.module('ramlEditorApp')
 })
 .run(function (MyFileSystem, config, $rootScope) {
         // Set MyFileSystem as the filesystem to use
-        config.set('fsFactory', 'MyFileSystem');
+       config.set('fsFactory', 'MyFileSystem');
 
         // In case you want to send notifications to the user
         // (for instance, that he must login to save).

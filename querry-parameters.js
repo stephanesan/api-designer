@@ -33,3 +33,12 @@ function querryString(gitParams) {
     return querry;
 }
 
+var assemblePath = function (segments) {
+    var path = "";
+    for(var i=0; i<segments.length; i++) {
+        path = path +'/'+ segments[i].replace(/\/$/, "").replace(/^\//, "");
+    }
+    return path;
+};
+
+

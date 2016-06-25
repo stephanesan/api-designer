@@ -104,7 +104,6 @@ angular.module('ramlEditorApp')
                         var git_url = dirs[current.path];
                         console.log('pop dirs['+current.path+']='+git_url);
                         $http.get(git_url).then(
-                        //$http.get('https://api.github.com/repos/'+gitParams.repo+'/contents/'+current.path+'?ref='+gitParams.ref).then(
                             function (data) {
                                 var out = f(data);
                                 var promisses = [];
@@ -132,7 +131,7 @@ angular.module('ramlEditorApp')
 
             console.log('start recurse') ;
             var root = {path: '/'};
-            dirs[root.path]='https://'+gitParams.api+'repos/'+gitParams.repo+'/contents/'+gitParams.path+'?ref='+gitParams.ref;
+            dirs[root.path]='https://'+ assemblePath([gitParams.api,'repos/',gitParams.repo,'/contents/',gitParams.path])+'?ref='+gitParams.ref;
             dir(root).then(function(data) {
                     console.log('done recurse');
                     deferred.resolve(data);

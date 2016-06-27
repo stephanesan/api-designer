@@ -55,25 +55,20 @@ angular.module('ramlEditorApp')
                            // (i.e. use .url instead of .download_url)
                            // because github doesn't allow cross origin
                            // on plain text files but does allow it on JSON
-                           if( 'file' == type && null != data[i].url) {
+                           if( ('file' == type && null == data[i].download_url) || 'file' != type ) {
+                               // files that don't have a download_url seem to be submodules
+                               // so these need to be treated as folders instead of files
+                               console.log("has folder " + data[i].name);
+                               current.children.push({path: index, type: 'folder', meta: {}});
+                               dirs[index] = data[i].git_url;
+                               console.log('push dirs['+index+']='+data[i].git_url);
+                            } else if( 'file' == type && null != data[i].url) {
                                console.log("has file " + data[i].name);
                                if((/\.(md|raml|json|schema|xml|xsd)$/i).test(data[i].name)) {
                                    current.children.push({path: index, type: 'file', meta: {}});
                                    files[index] = {type: 'blob', url: data[i].url};
                                }
-                           } else {
-                           //if( 'file' == type && null != data[i].download_url) {
-                           //    console.log("has file " + data[i].name);
-                           //    if((/\.(md|raml|json)$/i).test(data[i].name)) {
-                           //        current.children.push({path: index, type: 'file', meta: {}});
-                           //        files[index] = {type: type, url: data[i].download_url};
-                           //    }
-                           //} else {
-                               console.log("has folder " + data[i].name);
-                               current.children.push({path: index, type: 'folder', meta: {}});
-                               dirs[index] = data[i].git_url;
-                               console.log('push dirs['+index+']='+data[i].git_url);
-                           }
+                            }
                        }
                    // or response has a tree with an array of objects (git_url request)
                    } else if(Array.isArray(response.data.tree)) {

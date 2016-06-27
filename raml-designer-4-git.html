@@ -11,7 +11,7 @@
 <div id="layout" ng-app="headerApp" ng-controller="headerController">
     <div id="header" class="animate-show" ng-show="gitHeader">
         <div style="vertical-align: middle; display: inline-block"><b>Content from: </b></div>
-        <div style="height:100%; vertical-align: middle; display: inline-block"><image ng-src={{gitHubAvatar}} style="height:100%"/></div>
+        <div style="height:100%; vertical-align: middle; display: inline-block"><img ng-src={{gitHubAvatar}} style="height:100%"/></div>
         <div style="vertical-align: middle; display: inline-block">
             <a style='color:inherit' ng-href={{gitHubOwnerHtmlURL}}>{{gitHubOwnerLogin}}</a> <i>({{gitHubOwnerType}})</i> <b> Path: </b> <a style='color:inherit' ng-href={{gitHubHtmlUrl}}>{{gitHubRepoName}}</a>/{{gitHubRepoPath}}
         </div>
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div id="content-wrapper">
-        <iframe id="content" ng-src="{{ramlLocation}}">
+        <iframe id="content" ng-src="{{ramlLocation}}"></iframe>
     </div>
 </div>
 </body>

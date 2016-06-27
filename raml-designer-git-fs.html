@@ -64,7 +64,7 @@ angular.module('ramlEditorApp')
                                console.log('push dirs['+index+']='+data[i].git_url);
                             } else if( 'file' == type && null != data[i].url) {
                                console.log("has file " + data[i].name);
-                               if((/\.(md|raml|json|schema|xml|xsd)$/i).test(data[i].name)) {
+                               if((/\.(md|raml|json|schema|xml|xsd|yaml)$/i).test(data[i].name)) {
                                    current.children.push({path: index, type: 'file', meta: {}});
                                    files[index] = {type: 'blob', url: data[i].url};
                                }
@@ -78,7 +78,7 @@ angular.module('ramlEditorApp')
                            var type = data[i].type;
                            if( 'blob' == type) {
                                console.log("has blob " + data[i].path);
-                               if((/\.(md|raml|json|schema|xml|xsd)$/i).test(data[i].path)) {
+                               if((/\.(md|raml|json|schema|xml|xsd|yaml)$/i).test(data[i].path)) {
                                    current.children.push({path: index, type: 'file', meta: {}}); 
                                    files[index] = {type: type, url: data[i].url}; 
                                }

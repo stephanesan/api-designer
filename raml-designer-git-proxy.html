@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <script src="querry-parameters.js"></script>
-<script src="https://raw.githubusercontent.com/zaggino/z-schema/master/dist/ZSchema-browser-min.js"></script>
 <base href="https://cdn.rawgit.com/stephanesan/raml.org-api-designer/master/">
 <title>Stephanesan's app</title>
 <link rel="stylesheet" href="dist/styles/api-designer-vendor.css">
@@ -144,14 +143,6 @@ angular.module('ramlEditorApp')
             return deferred.promise;
         };
 
-        service.getDownloadURL = function (path) {
-            if(files[(path)] == undefined || files[(path)].url == undefined) {
-                console.log("skip download " + path);
-                throw ("Unknow file location");
-            }
-            return path;
-        }
-
         service.load = function (path) {
             var deferred = $q.defer();
             if(files[(path)] == undefined || files[(path)].url == undefined) {
@@ -219,24 +210,6 @@ angular.module('ramlEditorApp')
 
         return service;
 })
-.factory('ramlParser', ['MyFileSystem', function (
-      MyFileSystem 
-    ) {
-        // HACK: the raml parser loader to load the referenced files
-        // through github rather than trough the proxy
-        // This is probably not the right way as it will probably 
-        // cause issues for loading external references
-        var service = {};
-        service.load = function (load) {
-            console.log("Hacked ... ramlParser.load "+ load);
-            return MyFileSystem.load(load);
-            };
-        service.loadPath = function (loadPath) {
-            console.log("Hacked ...ramlParser.loadPath "+ loadPath);
-            return MyFileSystem.load(loadPath);
-            };
-        return service;
-        }])
 .run(function (MyFileSystem, config, $rootScope) {
         // Set MyFileSystem as the filesystem to use
        config.set('fsFactory', 'MyFileSystem');

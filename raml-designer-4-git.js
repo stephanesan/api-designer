@@ -123,7 +123,7 @@ angular
         }
 
         function updateIframe() {
-            $scope.ramlLocation = $sce.trustAsResourceUrl("./raml-designer-git-fs.html"+ querryString(gitParams));
+            $scope.ramlLocation = $sce.trustAsResourceUrl("./api-designer-git-proxy.html"+ querryString(gitParams));
         }
 
         var gitParams = getParams();
